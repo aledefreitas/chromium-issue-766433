@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Chromium Bug Issue 766433 Example - Service Worker</title>
+    </head>
+    <body>
+        <h1>Chromium Bug Issue 766433</h1>
+        <h3>What steps will reproduce the problem?</h3>
+
+        <ol>
+            <li>Open a website with a service worker that handles requests with a FetchEvent Listener and responds with FetchEvent.respondWith(), let it install and activate;</li>
+            <li>Install any extension that uses webRequest API and log the callback for events of chrome.webRequest.onHeadersReceived;</li>
+            <li>Open a fresh tab, access the website on which the service worker is registered from step 1.</li>
+        </ol>
+
+        <br>
+
+        <h3>What is the expected result?</h3>
+        <p>
+            The extension should trigger a webRequest.onHeadersReceived upon loading the Response sent by event.respondWith() on the Service Worker, and log its details, having a frameId >= 0.
+        </p>
+
+        <br>
+
+        <h3>What happens instead of that?</h3>
+        <p>
+            chrome.webRequest.onHeadersReceived fires but mantains the frameId = -1, even if you navigate between pages.
+        </p>
+
+        <br>
+            <p>
+                <strong>If you Bypass for Network on DevTools > Application > Service Worker, it works as intended, having frameId >= 0 for first load and also navigations</strong>
+            </p>
+        <br>
+
+        <script>
+            (function() {
+                if(!"serviceWorker" in navigator)
+                    return false;
+
+                navigator.serviceWorker.register("/service-worker.js", { "scope": "/" }).then(function() {
+                    let readyHtml = document.createElement("p");
+
+                    readyHtml.innerHTML = "<strong>Service Worker is registered, now open a fresh tab and then type the address to this site and enter: " + window.location.href + "</strong>";
+                    readyHtml.innerHTML = "<br> Also try accessing <a href='index.html'>index.html</a> to see the frameId not changing from -1";
+
+                    document.body.appendChild(readyHtml);
+                });
+            })();
+        </script>
+    </body>
+</html>
